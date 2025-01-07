@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Company</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+        header {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: #fff;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header p {
+            font-size: 1.2rem;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background: #2E7D32;
+            padding: 0.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        nav a {
+            color: #fff;
+            margin: 0 1rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        nav a:hover {
+            color: #C8E6C9;
+        }
+        .tab {
+            display: none;
+            opacity: 0;
+            transform: translateX(-100%);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .tab.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .post {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .post h3 {
+            margin-top: 0;
+        }
+        footer {
+            text-align: center;
+            background: #4CAF50;
+            color: #fff;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+        .admin-panel {
+            background: #f4f4f4;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 2rem;
+        }
+        .admin-panel input, .admin-panel textarea {
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .admin-panel button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .admin-panel button:hover {
+            background: #45A049;
+        }
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .login-modal.active {
+            display: flex;
+        }
+        .login-box {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .login-box input {
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-box button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .login-box button:hover {
+            background: #45A049;
+        }
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            nav a {
+                margin: 0 0.5rem;
+            }
+        }
+    </style>
+    <script>
+        let posts = [
+            { title: "Post Title 1", date: "YYYY-MM-DD", content: "Content of your first post goes here." },
+            { title: "Post Title 2", date: "YYYY-MM-DD", content: "Content of your second post goes here." }
+        ];
+
+        const adminCredentials = { username: "admin", password: "password123" };
+
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            if (tabId === 'admin' && !sessionStorage.getItem('isAdmin')) {
+                showLoginModal();
+                return;
+            }
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+
+        function hideLoginModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username === adminCredentials.username && password === adminCredentials.password) {
+                sessionStorage.setItem('isAdmin', true);
+                hideLoginModal();
+                showTab('admin');
+            } else {
+                alert('Invalid credentials!');
+            }
+        }
+
+        function renderPosts() {
+            const postSection = document.getElementById('post-list');
+            postSection.innerHTML = '';
+            posts.forEach((post, index) => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <h3>${post.title}</h3>
+                    <p><em>Date: ${post.date}</em></p>
+                    <p>${post.content}</p>
+                `;
+                
+                // Only show edit and delete buttons if the user is an admin
+                if (sessionStorage.getItem('isAdmin')) {
+                    postDiv.innerHTML += `
+                        <button onclick="editPost(${index})">Edit</button>
+                        <button onclick="deletePost(${index})">Delete</button>
+                    `;
+                }
+
+                postSection.appendChild(postDiv);
+            });
+        }
+
+        function addPost() {
+            const title = document.getElementById('post-title').value;
+            const date = document.getElementById('post-date').value;
+            const content = document.getElementById('post-content').value;
+            posts.push({ title, date, content });
+            renderPosts();
+        }
+
+        function editPost(index) {
+            const post = posts[index];
+            document.getElementById('post-title').value = post.title;
+            document.getElementById('post-date').value = post.date;
+            document.getElementById('post-content').value = post.content;
+            deletePost(index);
+        }
+
+        function deletePost(index) {
+            posts.splice(index, 1);
+            renderPosts();
+        }
+
+        document.addEventListener('DOMContentLoaded', renderPosts);
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Company</h1>
+        <p>Your one-stop solution for [Your Service/Industry]</p>
+    </header>
+
+    <nav>
+        <a href="#" onclick="showTab('home')">Home</a>
+        <a href="#" onclick="showTab('posts')">Posts</a>
+        <a href="#" onclick="showTab('about')">About</a>
+        <a href="#" onclick="showTab('admin')">Admin</a>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="tab active">
+            <h2>About Our Company</h2>
+            <p>Welcome to [Your Company Name], where we specialize in [brief description of your services or products]. We pride ourselves on delivering excellent customer service and quality solutions tailored to your needs.</p>
+        </section>
+
+        <section id="posts" class="tab">
+            <h2>Latest Posts</h2>
+            <div id="post-list"></div>
+        </section>
+
+        <section id="about" class="tab">
+            <h2>About Us</h2>
+            <p>[Your Company Name] was founded with the vision of [insert your mission statement or story]. Our team is dedicated to providing [specific services/products] with a focus on quality and customer satisfaction.</p>
+        </section>
+
+        <section id="admin" class="tab">
+            <h2>Admin Panel</h2>
+            <div class="admin-panel">
+                <h3>Add New Post</h3>
+                <input id="post-title" type="text" placeholder="Post Title">
+                <input id="post-date" type="date">
+                <textarea id="post-content" rows="5" placeholder="Post Content"></textarea>
+                <button onclick="addPost()">Add Post</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="login-modal" class="login-modal">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            <input id="username" type="text" placeholder="Username">
+            <input id="password" type="password" placeholder="Password">
+            <button onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 [Your Company Name]. All rights reserved.</p>
+    </footer>
+</body>
+</html>
