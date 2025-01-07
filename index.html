@@ -155,11 +155,6 @@
         }
     </style>
     <script>
-        let posts = [
-            { title: "Post Title 1", date: "YYYY-MM-DD", content: "Content of your first post goes here." },
-            { title: "Post Title 2", date: "YYYY-MM-DD", content: "Content of your second post goes here." }
-        ];
-
         const adminCredentials = { username: "admin", password: "password123" };
 
         function showTab(tabId) {
@@ -196,6 +191,7 @@
 
         function renderPosts() {
             const postSection = document.getElementById('post-list');
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
             postSection.innerHTML = '';
             posts.forEach((post, index) => {
                 const postDiv = document.createElement('div');
@@ -204,16 +200,9 @@
                     <h3>${post.title}</h3>
                     <p><em>Date: ${post.date}</em></p>
                     <p>${post.content}</p>
+                    <button onclick="editPost(${index})">Edit</button>
+                    <button onclick="deletePost(${index})">Delete</button>
                 `;
-                
-                // Only show edit and delete buttons if the user is an admin
-                if (sessionStorage.getItem('isAdmin')) {
-                    postDiv.innerHTML += `
-                        <button onclick="editPost(${index})">Edit</button>
-                        <button onclick="deletePost(${index})">Delete</button>
-                    `;
-                }
-
                 postSection.appendChild(postDiv);
             });
         }
@@ -222,11 +211,14 @@
             const title = document.getElementById('post-title').value;
             const date = document.getElementById('post-date').value;
             const content = document.getElementById('post-content').value;
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
             posts.push({ title, date, content });
+            localStorage.setItem('posts', JSON.stringify(posts));
             renderPosts();
         }
 
         function editPost(index) {
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
             const post = posts[index];
             document.getElementById('post-title').value = post.title;
             document.getElementById('post-date').value = post.date;
@@ -235,7 +227,9 @@
         }
 
         function deletePost(index) {
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
             posts.splice(index, 1);
+            localStorage.setItem('posts', JSON.stringify(posts));
             renderPosts();
         }
 
